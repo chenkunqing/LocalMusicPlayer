@@ -8,7 +8,10 @@ export default function TitleBar() {
       if ((e.target as HTMLElement).closest(".titlebar-btn")) return;
       appWindow.startDragging();
     }}>
-      <span className="titlebar-title">本地音乐</span>
+      <div className="titlebar-brand">
+        <span className="titlebar-icon">♫</span>
+        <span className="titlebar-title">PureTune Player 2026</span>
+      </div>
       <div className="titlebar-buttons">
         <button
           className="titlebar-btn titlebar-btn-minimize"

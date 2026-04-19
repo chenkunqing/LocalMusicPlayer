@@ -47,7 +47,8 @@ export function useLyric() {
 
   const currentLineIndex = useMemo(() => {
     for (let i = lines.length - 1; i >= 0; i--) {
-      if (lines[i].time <= currentTime) return i;
+      const item = lines[i];
+      if (item && item.time <= currentTime) return i;
     }
     return -1;
   }, [currentTime, lines]);
@@ -55,6 +56,7 @@ export function useLyric() {
   useEffect(() => {
     if (currentLineIndex < 0 || !showDesktopLyricRef.current) return;
     const line = lines[currentLineIndex];
+    if (!line) return;
     const nextLine = lines[currentLineIndex + 1];
     const payload: LyricPayload = { text: line.text, nextText: nextLine?.text ?? "" };
     emitTo("desktop-lyric", EVENT_LYRIC_UPDATE, payload).catch(() => {});

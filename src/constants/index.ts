@@ -11,3 +11,4 @@ export const MIME_MAP: Record<string, string> = {
 
 export const EVENT_LYRIC_UPDATE = "lyric-update";
 export const EVENT_TRAY_PLAY_PAUSE = "tray-play-pause";
+export const EVENT_DESKTOP_LYRIC_HIDDEN = "desktop-lyric-hidden";
