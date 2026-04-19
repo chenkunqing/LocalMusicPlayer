@@ -1,0 +1,26 @@
+node_modules/
+dist/
+data/
+*.db
+.env
+.env.*
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Tauri 构建产物
+src-tauri/target/
+src-tauri/gen/
+
+# IDE
+.vscode/
+.idea/
+
+# 日志与临时文件
+*.log
+*.tmp
+*.swp
+*~
+
+# Claude Code
+.claude/

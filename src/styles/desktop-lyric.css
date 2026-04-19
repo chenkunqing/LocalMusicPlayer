@@ -1,0 +1,42 @@
+html,
+body,
+#root {
+  background: transparent;
+}
+
+.desktop-lyric {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 4px 24px;
+  cursor: move;
+}
+
+.lyric-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.lyric-text {
+  white-space: nowrap;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0 0 8px rgba(0, 0, 0, 0.6);
+}
+
+.lyric-text-current {
+  font-size: 28px;
+  font-weight: bold;
+  color: #00d4ff;
+}
+
+.lyric-text-next {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.7);
+}
