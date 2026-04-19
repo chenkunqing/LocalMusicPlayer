@@ -17,6 +17,8 @@ interface PlayerState {
   setVolume: (v: number) => void;
   setShowDesktopLyric: (show: boolean) => void;
   incrementSeekVersion: () => void;
+  seekFn: ((ms: number) => void) | null;
+  setSeekFn: (fn: (ms: number) => void) => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set) => ({
@@ -35,4 +37,6 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   setVolume: (v) => set({ volume: v }),
   setShowDesktopLyric: (show) => set({ showDesktopLyric: show }),
   incrementSeekVersion: () => set((s) => ({ seekVersion: s.seekVersion + 1 })),
+  seekFn: null,
+  setSeekFn: (fn) => set({ seekFn: fn }),
 }));

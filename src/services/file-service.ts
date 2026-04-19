@@ -1,7 +1,7 @@
 import { open } from "@tauri-apps/plugin-dialog";
 import { readDir, readTextFile } from "@tauri-apps/plugin-fs";
 import { AUDIO_EXTENSIONS, LRC_EXTENSION } from "../constants";
-import type { Track } from "../types";
+import type { Track, FolderEntry } from "../types";
 
 export async function selectMusicFolder(): Promise<string | null> {
   const selected = await open({
@@ -45,4 +45,31 @@ export async function scanMusicFiles(dirPath: string): Promise<Track[]> {
 
 export async function readLrcFile(lrcPath: string): Promise<string> {
   return readTextFile(lrcPath);
+}
+
+export async function scanFolderContents(dirPath: string): Promise<{
+  folders: FolderEntry[];
+  audioFiles: FolderEntry[];
+}> {
+  const entries = await readDir(dirPath);
+  const separator = dirPath.includes("\\") ? "\\" : "/";
+  const folders: FolderEntry[] = [];
+  const audioFiles: FolderEntry[] = [];
+
+  for (const entry of entries) {
+    if (!entry.name) continue;
+    const fullPath = `${dirPath}${separator}${entry.name}`;
+    if (entry.isDirectory) {
+      folders.push({ name: entry.name, path: fullPath, isDirectory: true });
+    } else {
+      const ext = entry.name.split(".").pop()?.toLowerCase() ?? "";
+      if (AUDIO_EXTENSIONS.includes(ext as (typeof AUDIO_EXTENSIONS)[number])) {
+        audioFiles.push({ name: entry.name, path: fullPath, isDirectory: false });
+      }
+    }
+  }
+
+  folders.sort((a, b) => a.name.localeCompare(b.name));
+  audioFiles.sort((a, b) => a.name.localeCompare(b.name));
+  return { folders, audioFiles };
 }

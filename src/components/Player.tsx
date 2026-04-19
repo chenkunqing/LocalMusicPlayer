@@ -1,7 +1,10 @@
+import { useEffect } from "react";
+import { listen } from "@tauri-apps/api/event";
 import { usePlayerStore } from "../stores/player-store";
 import { usePlaylistStore, getNextTrack, getPrevTrack } from "../stores/playlist-store";
-import { useAudio } from "../hooks/use-audio";
+import { useNavStore } from "../stores/nav-store";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { EVENT_DESKTOP_LYRIC_HIDDEN } from "../constants";
 
 function formatTime(ms: number): string {
   const totalSec = Math.floor(ms / 1000);
@@ -11,7 +14,7 @@ function formatTime(ms: number): string {
 }
 
 export default function Player() {
-  const { seek } = useAudio();
+  const seekFn = usePlayerStore((s) => s.seekFn);
 
   const currentTrack = usePlayerStore((s) => s.currentTrack);
   const isPlaying = usePlayerStore((s) => s.isPlaying);
@@ -26,6 +29,19 @@ export default function Player() {
   const setShowDesktopLyric = usePlayerStore((s) => s.setShowDesktopLyric);
 
   const tracks = usePlaylistStore((s) => s.tracks);
+  const setView = useNavStore((s) => s.setView);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    listen(EVENT_DESKTOP_LYRIC_HIDDEN, () => {
+      setShowDesktopLyric(false);
+    }).then((fn) => {
+      unlisten = fn;
+    });
+    return () => {
+      unlisten?.();
+    };
+  }, [setShowDesktopLyric]);
 
   function handlePrev() {
     if (!currentTrack) return;
@@ -40,7 +56,7 @@ export default function Player() {
   }
 
   function handleSeek(e: React.ChangeEvent<HTMLInputElement>) {
-    seek(Number(e.target.value));
+    seekFn?.(Number(e.target.value));
   }
 
   function handleVolume(e: React.ChangeEvent<HTMLInputElement>) {
@@ -64,53 +80,77 @@ export default function Player() {
     }
   }
 
+  function handleCoverClick() {
+    if (currentTrack) {
+      setView("lyrics-immersion");
+    }
+  }
+
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+
   return (
     <div className="player">
-      <div className="player-info">
-        <span className="player-track-name">
-          {currentTrack?.fileName ?? "未选择歌曲"}
-        </span>
-      </div>
-      <div className="player-controls">
-        <button className="player-btn" onClick={handlePrev}>
-          上一首
-        </button>
-        <button className="player-btn player-btn-play" onClick={togglePlay}>
-          {isPlaying ? "暂停" : "播放"}
-        </button>
-        <button className="player-btn" onClick={handleNext}>
-          下一首
-        </button>
-      </div>
-      <div className="player-progress">
-        <span className="player-time">{formatTime(currentTime)}</span>
+      <div className="player-progress-bar">
+        <div className="player-progress-fill" style={{ width: `${progressPercent}%` }} />
         <input
           type="range"
-          className="player-slider"
           min={0}
           max={duration}
           value={currentTime}
           onChange={handleSeek}
           step={1000}
         />
-        <span className="player-time">{formatTime(duration)}</span>
       </div>
+
+      <div className="player-info">
+        <div
+          className="player-cover"
+          onClick={handleCoverClick}
+          title="进入沉浸模式"
+        >
+          <span className="player-cover-icon">♪</span>
+        </div>
+        <div className="player-track-meta">
+          <span className="player-track-name">
+            {currentTrack?.fileName ?? "未选择歌曲"}
+          </span>
+        </div>
+      </div>
+
+      <div className="player-center">
+        <div className="player-controls">
+          <button className="player-btn-skip" onClick={handlePrev}>⏮</button>
+          <button className="player-btn-play" onClick={togglePlay}>
+            {isPlaying ? "⏸" : "▶"}
+          </button>
+          <button className="player-btn-skip" onClick={handleNext}>⏭</button>
+        </div>
+        <div className="player-time-row">
+          <span className="player-time">{formatTime(currentTime)}</span>
+          <div style={{ flex: 1 }} />
+          <span className="player-time">{formatTime(duration)}</span>
+        </div>
+      </div>
+
       <div className="player-extra">
         <button
-          className={`player-btn player-btn-lyric ${showDesktopLyric ? "active" : ""}`}
+          className={`player-btn-lyric ${showDesktopLyric ? "active" : ""}`}
           onClick={handleToggleDesktopLyric}
         >
           词
         </button>
-        <input
-          type="range"
-          className="player-volume"
-          min={0}
-          max={1}
-          step={0.01}
-          value={volume}
-          onChange={handleVolume}
-        />
+        <div className="player-volume-wrap">
+          <span className="player-volume-icon">🔊</span>
+          <input
+            type="range"
+            className="player-volume"
+            min={0}
+            max={1}
+            step={0.01}
+            value={volume}
+            onChange={handleVolume}
+          />
+        </div>
       </div>
     </div>
   );

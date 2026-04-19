@@ -19,8 +19,6 @@ export function useAudio() {
   const setDuration = usePlayerStore((s) => s.setDuration);
   const setTrack = usePlayerStore((s) => s.setTrack);
 
-  const tracks = usePlaylistStore((s) => s.tracks);
-
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
       window.clearInterval(timerRef.current);
@@ -129,6 +127,7 @@ export function useAudio() {
   }, [volume]);
 
   const incrementSeekVersion = usePlayerStore((s) => s.incrementSeekVersion);
+  const setSeekFn = usePlayerStore((s) => s.setSeekFn);
 
   const seek = useCallback((ms: number) => {
     const howl = howlRef.current;
@@ -140,6 +139,10 @@ export function useAudio() {
   }, [setCurrentTime, incrementSeekVersion]);
 
   useEffect(() => {
+    setSeekFn(seek);
+  }, [seek, setSeekFn]);
+
+  useEffect(() => {
     return () => {
       howlRef.current?.unload();
       clearTimer();
@@ -147,5 +150,5 @@ export function useAudio() {
     };
   }, [clearTimer]);
 
-  return { seek, tracks };
+  return { seek };
 }
